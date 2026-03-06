@@ -8,17 +8,6 @@
 import Foundation
 import CoreText
 
-struct FamilyModel: Identifiable {
-    let id = UUID()
-    let familyName: String
-    var fonts: [FontModel]
-}
-
-struct FontModel: Hashable {
-    let url: URL
-    let font: String
-}
-
 final class FontsStorage: ObservableObject {
     static let shared = FontsStorage()
     private init() {}
@@ -45,7 +34,7 @@ final class FontsStorage: ObservableObject {
 
 private extension FontsStorage {
     func parse(files: [URL]) -> [FamilyModel] {
-        var dic: [String : [FontModel]] = [:]
+        var dic: [String : [FontConvertible]] = [:]
         
         for file in files {
             setFontModels(file: file, dic: &dic)
@@ -56,7 +45,7 @@ private extension FontsStorage {
         }
     }
     
-    func setFontModels(file: URL, dic: inout [String : [FontModel]]) {
+    func setFontModels(file: URL, dic: inout [String : [FontConvertible]]) {
         let descs = CTFontManagerCreateFontDescriptorsFromURL(file as CFURL)
         guard let descRefs = descs as? [CTFontDescriptor] else { return }
         
@@ -66,28 +55,8 @@ private extension FontsStorage {
             guard let familyName = CTFontCopyAttribute(font, kCTFontFamilyNameAttribute) as? String else { continue }
             //let style = CTFontCopyAttribute(font, kCTFontStyleNameAttribute) as? String
             
-            dic[familyName, default: []].append(FontModel(url: file, font: postScriptName))
+            dic[familyName, default: []].append(FontConvertible(name: postScriptName, family: familyName, path: file))
         }
-    }
-}
-
-extension Array where Element == FamilyModel {
-    mutating func add(_ newElement: Element) {
-        if let ind = self.firstIndex(where: {$0.familyName == newElement.familyName}) {
-            for newFont in newElement.fonts {
-                if !self[ind].fonts.contains(newFont) {
-                    self[ind].fonts.append(newFont)
-                }
-            }
-        } else {
-            append(newElement)
-        }
-    }
-}
-
-extension FileManager {
-    static var documentDirectory: URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     }
 }
 
