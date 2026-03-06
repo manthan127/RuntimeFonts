@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-internal struct FontConvertible {
+struct FontConvertible: Hashable {
     internal let name: String
     internal let family: String
     internal let path: URL
