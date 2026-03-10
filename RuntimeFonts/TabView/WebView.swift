@@ -47,6 +47,28 @@ struct WebView: UIViewRepresentable {
             }
         }
         
+        func webView(
+            _ webView: WKWebView,
+            decidePolicyFor navigationAction: WKNavigationAction
+        ) async -> WKNavigationActionPolicy {
+            guard let url = navigationAction.request.url, url.pathExtension == "zip" else {
+                return .allow
+            }
+            
+            Task {
+                let (tempURL, _) = try await URLSession.shared.download(from: url)
+                let destination = FileManager.documentDirectory.appendingPathComponent(url.lastPathComponent)
+                
+                try FileManager.default.moveItem(at: tempURL, to: destination)
+                
+                let extractURL = destination.deletingPathExtension()
+                try FileManager.default.unzipItem(at: destination, to: extractURL)
+                
+                FontsStorage.shared.add(extractURL)
+            }
+            return .cancel
+        }
+        
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             print("Finished loading")
         }

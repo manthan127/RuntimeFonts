@@ -21,6 +21,7 @@ struct ContentView: View {
                 }
             
             WebView(url: URL(string: "https://fonts.google.com")!)
+//            WebView(url: URL(string: "https://www.dafontfree.io/downfile/gilroy-font/")!)
                 .ignoresSafeArea()
                 .tabItem {
                     Label("Fonts", systemImage: "globe")
