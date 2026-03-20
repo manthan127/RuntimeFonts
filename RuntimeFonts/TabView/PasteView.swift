@@ -88,9 +88,7 @@ struct PasteView: View {
                 }
         }
         Task {
-            print("start")
-            await DownloadSession().download(group)
-            print("end")
+            try await DownloadSession().download(group)
         }
     }
 }
